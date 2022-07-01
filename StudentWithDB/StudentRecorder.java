@@ -40,6 +40,9 @@ class Student
     int getAge(){
         return this.age;
     }
+	public String toString(){ 
+	  return "students";  
+	}  
 }
 class StudentDao{
 	private final String url = "jdbc:oracle:thin:@localhost:1521:xe";
@@ -131,11 +134,14 @@ class StudentRecorder {
 		Student s = Student(rollNo,name,dept,age);
         StudentDao.AddStudent(s);
     }
-    static void listAllStudents(){
-        for(HashMap<String, String> sMap : createStudentMapList(students)){
-            for (Map.Entry<String,String> entry : sMap.entrySet())
-            System.out.println(entry.getKey() +
-                             " : " + entry.getValue());
+    static void listAllTables(){
+        for(Map<String, List<Object>> sMap : createDataMapList(tableList)){
+            for (Map.Entry<String,List<Student>> entry : sMap.entrySet()){
+				System.out.println(entry.getKey());
+				for (table : entry.getValue()){
+					System.out.println("\t"+table);
+				}
+			}
 
             System.out.println("\n");
         }
@@ -159,30 +165,12 @@ class StudentRecorder {
         });
         return s;
     }
-	/*
-   static List<HashMap<String, String>> createStudentMapList(ArrayList<Student> students){
-        List<HashMap<String, String>> studentMapList = new ArrayList<HashMap<String, String>>();
-        for(Student s : students){
-            HashMap<String, String> studentsMap = new HashMap<>();
-            studentsMap.put("rollNo", s.getRollNo()+"");
-            studentsMap.put("name", s.getName());
-            studentsMap.put("dept", s.getDept());
-            studentsMap.put("age", s.getAge()+"");
-            studentMapList.add(studentsMap);
-        }
-        return studentMapList;
-    }*/
-	static List<Map<String, List<Student>>> createStudentMapList(ArrayList<Student> students){
-        List<Map<String, List<Student>>> studentMapList = new ArrayList<Map<String, List<Student>>>();
-        for(Student s : students){
-            HashMap<String, String> studentsMap = new HashMap<>();
-            studentsMap.put("rollNo", s.getRollNo()+"");
-            studentsMap.put("name", s.getName());
-            studentsMap.put("dept", s.getDept());
-            studentsMap.put("age", s.getAge()+"");
-            studentMapList.add(studentsMap);
-        }
-        return studentMapList;
+	static List<Map<String, List<Object>>> createDataMapList(List<Object> tables){
+        List<Map<String, List<Student>>> dataMapList = new ArrayList<Map<String, List<Student>>>();
+		for (table : tables){
+			dataMapList.put(String.valueOf(table),table);
+		}
+        return dataMapList;
     }
 }
 
