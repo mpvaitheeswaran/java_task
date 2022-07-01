@@ -1,5 +1,6 @@
 import java.io.*;
 import java.util.*;
+import java.sql.*
 
 class Student
 {
@@ -41,55 +42,56 @@ class Student
     }
 }
 class StudentDao{
+	private final String url = "jdbc:oracle:thin:@localhost:1521:xe";
+    private final String user = "system";
+    private final String password = "oracle";
 
-    static ArrayList<Student> getDataFromFile(){
-        ArrayList<Student> students = new ArrayList<Student>();
-        try {
-            BufferedReader reader = new BufferedReader(new FileReader("Student.txt"));
-            String line;
-            while((line = reader.readLine()) != null) {
-                //If the first line is '#' skip the line and handling IndexOutOfBounds Exception.
-                try{
-                    if(! (line.charAt(0)=='#')){
-                        String[] data=line.split(",");
-                        int rollNo = Integer.parseInt(data[0]);
-                        String name = data[1]; String dept = data[2];
-                        int age = Integer.parseInt(data[3]);
-                        Student s = new Student(rollNo,name,dept,age);
-                        students.add(s);
-                    }
-                }
-                catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            reader.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return students;
+    public Connection connect() throws SQLException {
+        return DriverManager.getConnection(url, user, password);
     }
-    static void setDataIntoFile(ArrayList<Student> students){
-        try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter("Student.txt"));
-
-            for (Student s : students) {
-                writer.write("\n"+s.getRollNo()+","+s.getName()+","+s.getDept()+","+s.getAge());
-            }
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+	static List<Student> fetchStudentData(){
+		List<Student> students = new ArrayList<Student>();
+		try{ 
+			Connection conn = connect();  
+			  
+			Statement stmt=con.createStatement();  
+			  
+			ResultSet rs=stmt.executeQuery("select * from students");  
+			while(rs.next()){
+				int rollNo = rs.getInt(1);
+                String name =rs.getString(2); String dept = rs.getString(3);
+                int age = rs.getInt(4);
+                Student s = new Student(rollNo,name,dept,age);
+                students.add(s);
+			}
+			con.close();  
+		}catch(Exception e){ System.out.println(e); System.out.println("Database connection Failed.");}  
+			  
+		return students;
+	}
+	static void AddStudent(Student student){
+        try{ 
+			String SQL = "INSERT INTO students(roll_no,name,dept,age) " + "VALUES(?,?,?,?)";
+			Connection conn = connect(); 
+			PreparedStatement pstmt = conn.prepareStatement(SQL,Statement.RETURN_GENERATED_KEYS);
+			pstmt.setInt(1, student.getRollNo());
+            pstmt.setString(2, student.getName());
+			pstmt.setString(3, student.getDept());
+			pstmt.setInt(4, student.getAge());
+			con.close();  
+		}catch(Exception e){ System.out.println(e); System.out.println("Database connection Failed.");}
     }
+		
+			
+	}
+    
 }
 class StudentRecorder {
     private static ArrayList<Student> students;
 
     public static void main(String[] args) {
-        //Creating students
-        //createStudentList();
-        //Get data from a file
-        students = StudentDao.getDataFromFile();
+       
+        students = StudentDao.fetchStudentData();
         int input=0;
         Scanner scan = new Scanner(System.in);
         while(input!=3){
@@ -126,8 +128,8 @@ class StudentRecorder {
         dept = scan.nextLine();
         System.out.println("Enter the Student Age");
         age = Integer.parseInt(scan.nextLine());
-        students.add(new Student(rollNo,name,dept,age));
-        StudentDao.setDataIntoFile(students);
+		Student s = Student(rollNo,name,dept,age);
+        StudentDao.AddStudent(s);
     }
     static void listAllStudents(){
         for(HashMap<String, String> sMap : createStudentMapList(students)){
@@ -138,25 +140,11 @@ class StudentRecorder {
             System.out.println("\n");
         }
     }
-    static void createStudentList(){
-        Student s1 = new Student(100,"Pandiyan","BCA",18);
-        Student s2 = new Student(101,"Arun","Bsc",20);
-        Student s3 = new Student(102,"Surya","BBA",17);
-        Student s4 = new Student(103,"Karthick","BCA",21);
-        Student s5 = new Student(104,"agustin","BCA",23);
-
-        students = new ArrayList<Student>();
-        students.add(s1);
-        students.add(s2);
-        students.add(s3);
-        students.add(s4);
-        students.add(s5);
-        StudentDao.setDataIntoFile(students);
-    }
-    static ArrayList<Student> getAllStudends(){
+   
+    static List<Student> getAllStudends(){
         return students;
     }
-    static ArrayList<Student> sortStudentsByAge(ArrayList<Student> s){
+    static List<Student> sortStudentsByAge(List<Student> s){
         //Using Comparator to sort.
         Collections.sort(s,new Comparator<Student>() {
             @Override
@@ -171,8 +159,21 @@ class StudentRecorder {
         });
         return s;
     }
+	/*
    static List<HashMap<String, String>> createStudentMapList(ArrayList<Student> students){
         List<HashMap<String, String>> studentMapList = new ArrayList<HashMap<String, String>>();
+        for(Student s : students){
+            HashMap<String, String> studentsMap = new HashMap<>();
+            studentsMap.put("rollNo", s.getRollNo()+"");
+            studentsMap.put("name", s.getName());
+            studentsMap.put("dept", s.getDept());
+            studentsMap.put("age", s.getAge()+"");
+            studentMapList.add(studentsMap);
+        }
+        return studentMapList;
+    }*/
+	static List<Map<String, List<Student>>> createStudentMapList(ArrayList<Student> students){
+        List<Map<String, List<Student>>> studentMapList = new ArrayList<Map<String, List<Student>>>();
         for(Student s : students){
             HashMap<String, String> studentsMap = new HashMap<>();
             studentsMap.put("rollNo", s.getRollNo()+"");
