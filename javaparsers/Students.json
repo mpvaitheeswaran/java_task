@@ -1,0 +1,26 @@
+[
+	{
+		"rollno":"100",
+		"name":"Vaitheeswaran",
+		"dept":"BCA",
+		"age":"21"
+	},
+	{
+		"rollno":"101",
+		"name":"kumar",
+		"dept":"BCA",
+		"age":"25"
+	},
+	{
+		"rollno":"102",
+		"name":"Vijay",
+		"dept":"BE",
+		"age":"18"
+	},
+	{
+		"rollno":"103",
+		"name":"Vasanth",
+		"dept":"Bsc",
+		"age":"19"
+	}
+]
