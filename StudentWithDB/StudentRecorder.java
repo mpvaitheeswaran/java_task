@@ -1,6 +1,6 @@
 import java.io.*;
 import java.util.*;
-import java.sql.*
+import java.sql.*;
 
 class Student
 {
@@ -45,11 +45,11 @@ class Student
 	}  
 }
 class StudentDao{
-	private final String url = "jdbc:oracle:thin:@localhost:1521:xe";
-    private final String user = "system";
-    private final String password = "oracle";
+	private static final String url = "jdbc:oracle:thin:@BSIT-CH-D005:1521:orcl";
+    private static final String user = "orcltest";
+    private static final String password = "orcltest";
 
-    public Connection connect() throws SQLException {
+    public static Connection connect() throws SQLException {
         return DriverManager.getConnection(url, user, password);
     }
 	static List<Student> fetchStudentData(){
@@ -57,7 +57,7 @@ class StudentDao{
 		try{ 
 			Connection conn = connect();  
 			  
-			Statement stmt=con.createStatement();  
+			Statement stmt=conn.createStatement();  
 			  
 			ResultSet rs=stmt.executeQuery("select * from students");  
 			while(rs.next()){
@@ -67,7 +67,8 @@ class StudentDao{
                 Student s = new Student(rollNo,name,dept,age);
                 students.add(s);
 			}
-			con.close();  
+			System.out.println("Database connected.");
+			conn.close();  
 		}catch(Exception e){ System.out.println(e); System.out.println("Database connection Failed.");}  
 			  
 		return students;
@@ -81,20 +82,20 @@ class StudentDao{
             pstmt.setString(2, student.getName());
 			pstmt.setString(3, student.getDept());
 			pstmt.setInt(4, student.getAge());
-			con.close();  
+			conn.close();  
 		}catch(Exception e){ System.out.println(e); System.out.println("Database connection Failed.");}
     }
 		
 			
-	}
-    
 }
 class StudentRecorder {
-    private static ArrayList<Student> students;
+    private static List<Student> students;
+	private static List<Object> tableList;
 
     public static void main(String[] args) {
        
         students = StudentDao.fetchStudentData();
+		/*
         int input=0;
         Scanner scan = new Scanner(System.in);
         while(input!=3){
@@ -110,7 +111,7 @@ class StudentRecorder {
                 default :
                     System.out.println("Invalid Input.");
             }
-        }
+        }*/
 
 
     }
@@ -131,14 +132,15 @@ class StudentRecorder {
         dept = scan.nextLine();
         System.out.println("Enter the Student Age");
         age = Integer.parseInt(scan.nextLine());
-		Student s = Student(rollNo,name,dept,age);
+		Student s =new Student(rollNo,name,dept,age);
         StudentDao.AddStudent(s);
     }
+	/*
     static void listAllTables(){
         for(Map<String, List<Object>> sMap : createDataMapList(tableList)){
             for (Map.Entry<String,List<Student>> entry : sMap.entrySet()){
 				System.out.println(entry.getKey());
-				for (table : entry.getValue()){
+				for (Object table : entry.getValue()){
 					System.out.println("\t"+table);
 				}
 			}
@@ -167,11 +169,11 @@ class StudentRecorder {
     }
 	static List<Map<String, List<Object>>> createDataMapList(List<Object> tables){
         List<Map<String, List<Student>>> dataMapList = new ArrayList<Map<String, List<Student>>>();
-		for (table : tables){
+		for (Object table : tables){
 			dataMapList.put(String.valueOf(table),table);
 		}
         return dataMapList;
-    }
+    }*/
 }
 
 

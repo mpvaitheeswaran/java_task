@@ -127,6 +127,7 @@ class StudentRecorder {
         System.out.println("Enter the Student Age");
         age = Integer.parseInt(scan.nextLine());
         students.add(new Student(rollNo,name,dept,age));
+		//Writing into file
         StudentDao.setDataIntoFile(students);
     }
     static void listAllStudents(){
